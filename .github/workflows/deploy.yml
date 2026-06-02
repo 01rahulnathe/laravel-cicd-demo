@@ -7,30 +7,38 @@ on:
 
 jobs:
 
-  test:
-    runs-on: ubuntu-latest
+test:
+  runs-on: ubuntu-latest
 
-    steps:
+  steps:
+    - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.3
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
 
-        with:
-          php-version: 8.3
+    - name: Install Composer Dependencies
+      run: composer install
 
-      - name: Install Dependencies
-        run: composer install
+    - name: Install Node Dependencies
+      run: npm install
 
-      - name: Copy Env
-        run: cp .env.example .env
+    - name: Build Assets
+      run: npm run build
 
-      - name: Generate Key
-        run: php artisan key:generate
+    - name: Setup Environment
+      run: |
+        cp .env.example .env
+        php artisan key:generate
 
-      - name: Run Tests
-        run: php artisan test
+    - name: Run Tests
+      run: php artisan test
 
   deploy:
     needs: test
